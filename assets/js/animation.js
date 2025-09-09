@@ -1,56 +1,38 @@
-// Animation object with functions
-// function load(cvs)
-// function update()
-// function draw()
+// Get color from CSS variable
+function getCSSVariableColor(variableName) {
+    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+}
 
-
-// Convert text into pixel mask. 1 for filled pixel, 0 for empty pixel
-function getTextMask(text, width, height, cell_size) {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = width * cell_size;
-    canvas.height = height * cell_size;
-
-    ctx.fillStyle = "black";
-    ctx.font = `${cell_size * 30}px monospace`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, canvas.width / 2, canvas.height * 4 / 7);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-
-    let mask = Array.from({ length: height }, () => Array(width).fill(0));
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            let pixelIndex = ((y * cell_size) * canvas.width + (x * cell_size)) * 4;
-            let alpha = data[pixelIndex + 3];
-            if (alpha > 128) {
-                mask[y][x] = 1;
-            }
-        }
-    }
-    return mask;
+function getBannerFontSize() {
+    const width = window.innerWidth;
+    if (width >= 1200) return 25;
+    if (width >= 992) return 30;
+    if (width >= 768) return 35;
+    return 40;
 }
 
 class GameOfLife {
     constructor() {
-        this.width = 120;
-        this.height = 40;
+        this.width = 240;
+        this.height = 50;
         this.cell_size = 8;
         this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
-        this.mask = getTextMask("Hello!", this.width, this.height, this.cell_size);
     }
 
-    load(canvas) {
+    load(canvas, text) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
+        this.mask = this.getTextMask(text.innerHTML || "Hello!", this.width, this.height, this.cell_size);
+        addEventListener('resize', () => {
+            this.mask = this.getTextMask(text.innerHTML || "Hello!", this.width, this.height, this.cell_size);
+        });
 
         // Update canvas size
         this.canvas.width = this.width * this.cell_size;
         this.canvas.height = this.height * this.cell_size;
+
+        // Set text invisible
+        text.style.color = "#fff0";
 
         // Randomly initialize the grid
         for (let y = 0; y < this.height; y++) {
@@ -58,6 +40,34 @@ class GameOfLife {
                 this.grid[y][x] = Math.random() > 0.35 ? 1 : 0;
             }
         }
+    }
+
+    getTextMask(text, width, height, cell_size) {
+        // Draw text on offscreen canvas and get pixel data
+        const canvas = document.createElement("canvas");
+        canvas.width = width * cell_size;
+        canvas.height = height * cell_size;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "black";
+        ctx.font = `${cell_size * getBannerFontSize()}px monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Create mask based on alpha channel
+        let mask = Array.from({ length: height }, () => Array(width).fill(0));
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let pixelIndex = ((y * cell_size) * canvas.width + (x * cell_size)) * 4;
+                let alpha = data[pixelIndex + 3];
+                if (alpha > 128) {
+                    mask[y][x] = 1;
+                }
+            }
+        }
+        return mask;
     }
 
     update() {
@@ -68,6 +78,7 @@ class GameOfLife {
             this.grid[y][x] = 1;
         }
 
+        // Apply Game of Life rules
         let newGrid = this.grid.map(arr => arr.slice());
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
@@ -82,8 +93,6 @@ class GameOfLife {
             }
         }
         this.grid = newGrid;
-
-        this.draw();
     }
 
     count_neighbors(grid, x, y) {
@@ -100,32 +109,31 @@ class GameOfLife {
     }
 
     draw() {
+        // Get current theme colors
+        let colorAliveMask = getCSSVariableColor('--link-current-color') || "darkred";
+        let colorAlive = getCSSVariableColor('--link-color') || "orangered";
+        let colorDeadMask = getCSSVariableColor('--text-color') || "#8888af";
+        let colorDead = getCSSVariableColor('--bg-color') || "#eeeef8";
+
+        // Draw cells
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 if (this.grid[y][x] === 1) {
-                    this.ctx.fillStyle = this.mask[y][x] === 1 ? "darkred" : "orangered";
-                    this.ctx.beginPath();
-                    this.ctx.arc(
-                        x * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
-                        y * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
-                        this.cell_size / 2,
-                        0,
-                        2 * Math.PI
-                    );
-                    this.ctx.fill();
-                } else if (this.mask[y][x] === 1) {
-                    this.ctx.fillStyle = "lightgray";
-                    this.ctx.beginPath();
-                    this.ctx.arc(
-                        x * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
-                        y * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
-                        this.cell_size / 2,
-                        0,
-                        2 * Math.PI
-                    );
-                    this.ctx.fill();
+                    this.ctx.fillStyle = this.mask[y][x] === 1 ? colorAliveMask : colorAlive;
+
+                } else {
+                    this.ctx.fillStyle = this.mask[y][x] === 1 ? colorDeadMask : colorDead;
                 }
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    x * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
+                    y * this.cell_size + this.cell_size / 2 + Math.random() * 2 - 1,
+                    this.cell_size / 2,
+                    0,
+                    2 * Math.PI
+                );
+                this.ctx.fill();
             }
         }
     }
@@ -134,13 +142,14 @@ class GameOfLife {
 // Initialize the animation when the window loads
 window.onload = function () {
     const canvas = document.getElementById("animation");
+    const text = document.getElementById("text");
     if (canvas.getContext) {
         const anim = new GameOfLife();
-        anim.load(canvas);
+        anim.load(canvas, text);
         // Start the animation loop
         this.intervalId = setInterval(() => {
             anim.update()
-            anim.update();
+            anim.draw();
         }, 100);
     }
 }

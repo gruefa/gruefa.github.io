@@ -10,14 +10,24 @@
   <title>{{ page.title }}</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
   <script src="/assets/js/animation.js" defer></script>
+  <script src="/assets/js/theme.js" defer></script>
 </head>
 
 <body>
   <header>
-    {% include navigation.html %}
+    <div class="content">
+      {% include navigation.html %}
+      <button id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Theme">🌓</button>
+    </div>
   </header>
   <main>
-    {{ content }}
+    <div id="greeting">
+      <canvas id="animation" width="200" height="100"></canvas>
+      <span id="text">{{ page.title }}</span>
+    </div>
+    <div class="content">
+      {{ content }}
+    </div>
   </main>
   {% include footer.html %}
 </body>

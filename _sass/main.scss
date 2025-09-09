@@ -1,60 +1,25 @@
-/* TODO: Remove this when we have real content */
-// * {
-//     outline: 1px solid red !important;
-// }
-
-.current {
-    color: green;
+[data-theme="light"] {
+    --bg-color: #fff;
+    --text-color: #000;
+    --header-footer-bg: #fff;
+    --header-footer-border: #eee;
+    --link-color: #0066cc;
+    --link-current-color: #009900;
 }
 
-main {
-    width: 100%;
-    max-width: 1000px;
-    margin: auto;
-    padding: 1rem;
-    box-sizing: border-box;
-    line-height: 1.6;
-    font: 18px/1.6 "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-#greeting {
-    position: relative;
-    width: 100%;
-    padding: 0;
-    border-radius: 20px;
-    box-sizing: border-box;
-
-    & #animation {
-        width: 100%;
-        margin: 0;
-    }
-
-    & #text {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: #fff0;
-        mix-blend-mode: multiply;
-        font-size: 240px;
-        font-family: monospace;
-    }
-}
-
-
-header {
-    width: 100%;
-    max-width: 1000px;
-    margin: auto;
-    padding: 1rem;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --header-footer-bg: #1e1e1e;
+    --header-footer-border: #333;
+    --link-color: #3399ff;
+    --link-current-color: #33cc33;
 }
 
 html {
     padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 body {
@@ -63,20 +28,112 @@ body {
     margin: 0;
 }
 
+header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    padding: 1rem;
+    border-bottom: 1px solid var(--header-footer-border);
+    box-sizing: border-box;
+    background-color: var(--header-footer-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    line-height: 1.6;
+    font:
+        18px/1.6 "Helvetica Neue",
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    & .content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+
+        & .current {
+            color: var(--link-current-color);
+        }
+    }
+}
+
+#theme-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+main {
+    margin: auto;
+    box-sizing: border-box;
+    padding: 16px 16px 4rem; /* Add space for the footer height */
+
+    & .content {
+        width: 100%;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.6;
+        font:
+            18px/1.6 "Helvetica Neue",
+            Helvetica,
+            Arial,
+            sans-serif;
+    }
+}
+
+#greeting {
+    position: relative;
+    width: 100vw;
+    height: calc(90vw * 50 / 240);
+    padding: 0;
+    border-bottom: 1px solid var(--header-footer-border);
+    box-sizing: border-box;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 300px;
+
+    & #animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        margin: 0;
+    }
+
+    & #text {
+        display: block;
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 200px;
+        font-family: monospace;
+    }
+}
+
 footer {
     width: 100%;
     padding: 1rem;
     box-sizing: border-box;
     text-align: center;
     font-size: 14px;
-    color: #666;
+    color: var(--text-color);
     position: absolute;
     left: 0;
     bottom: 0;
-    background: #fff;
+    background: var(--header-footer-bg);
     z-index: 10;
-}
-
-main {
-    padding-bottom: 4rem; // Add space for the footer height
+    border-top: 1px solid var(--header-footer-border);
 }
