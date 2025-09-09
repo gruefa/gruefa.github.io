@@ -3,8 +3,8 @@
     --bg-color-1: #fff;
     --bg-color-2: #f9f9f9;
     --border-color: #eee;
-    --accent-color-1: #246eb9;
-    --accent-color-2: #ec0b43;
+    --accent-color-1: #90c3f5; // #246eb9;
+    --accent-color-2: #990026;
     --accent-color-3: #e6af2e;
 }
 
@@ -13,7 +13,7 @@
     --bg-color-1: #121212;
     --bg-color-2: #1e1e1e;
     --border-color: #333;
-    --accent-color-1: #c7e3ff;
+    --accent-color-1: #0051a1;
     --accent-color-2: #ff7d9b;
     --accent-color-3: #ffd36c;
 }
@@ -36,8 +36,6 @@ header {
     left: 0;
     z-index: 10;
     width: 100%;
-    padding-left: 4rem;
-    padding-right: 4rem;
     border-bottom: 1px solid var(--border-color);
     box-sizing: border-box;
     background-color: var(--bg-color-2);
@@ -59,6 +57,13 @@ header {
         max-width: 1000px;
         margin-left: auto;
         margin-right: auto;
+        padding-left: 4rem;
+        padding-right: 4rem;
+        @media (max-width: 800px) {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
         & nav {
             display: flex;
             gap: 1rem;
@@ -108,6 +113,10 @@ main {
         margin-right: auto;
         padding-left: 4rem;
         padding-right: 4rem;
+        @media (max-width: 800px) {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
         line-height: 1.6;
         font:
             18px/1.6 "Helvetica Neue",
@@ -118,10 +127,13 @@ main {
     }
 }
 
-#greeting {
+#banner {
     position: relative;
     width: 100vw;
-    height: 20vw;
+    height: 320px;
+    @media (max-width: 1200px) {
+        height: 220px;
+    }
     padding: 0;
     border-bottom: 1px solid var(--border-color);
     box-sizing: border-box;
@@ -147,10 +159,10 @@ main {
         left: 50%;
         transform: translate(-50%, -50%);
         font-family: monospace;
-        font-size: 160px;
+        font-size: 208px;
 
-        @media (max-width: 1000px) {
-            font-size: 14vw;
+        @media (max-width: 1200px) {
+            font-size: 18vw;
         }
     }
 }
