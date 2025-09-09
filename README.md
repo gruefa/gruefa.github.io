@@ -1,2 +1,6 @@
-# gruefa.github.io
-Personal Webpage
+# Personal Webpage
+
+## TODOs
+- [ ] Animation for landing page
+- [ ] SEO
+- [ ] Domain
