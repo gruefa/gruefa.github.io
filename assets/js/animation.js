@@ -3,31 +3,19 @@ function getCSSVariableColor(variableName) {
     return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
 }
 
-function getBannerFontSize() {
-    const width = window.innerWidth;
-    if (width >= 1200) return 25;
-    if (width >= 992) return 30;
-    if (width >= 768) return 35;
-    return 40;
-}
 
 class GameOfLife {
-    constructor() {
-        this.width = 240;
-        this.height = 50;
-        this.cell_size = 8;
-        this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
-    }
-
     load(canvas, text) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
+        const dims = this.getResponsiveDimensions();
+        this.width = dims.width;
+        this.height = dims.height;
+        this.cell_size = dims.cellSize;
+        this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
         this.mask = this.getTextMask(text.innerHTML || "Hello!", this.width, this.height, this.cell_size);
-        addEventListener('resize', () => {
-            this.mask = this.getTextMask(text.innerHTML || "Hello!", this.width, this.height, this.cell_size);
-        });
 
         // Update canvas size
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
         this.canvas.width = this.width * this.cell_size;
         this.canvas.height = this.height * this.cell_size;
 
@@ -42,6 +30,15 @@ class GameOfLife {
         }
     }
 
+    getResponsiveDimensions() {
+        const width = window.innerWidth;
+        if (width > 1000) {
+            return { width: Math.round(width / 5), height: Math.round(width / 25), cellSize: 8 };
+        } else {
+            return { width: 160, height: 32, cellSize: 12 };
+        }
+    }
+
     getTextMask(text, width, height, cell_size) {
         // Draw text on offscreen canvas and get pixel data
         const canvas = document.createElement("canvas");
@@ -49,7 +46,8 @@ class GameOfLife {
         canvas.height = height * cell_size;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "black";
-        ctx.font = `${cell_size * getBannerFontSize()}px monospace`;
+        const fontSize = this.getResponsiveFontSize();
+        ctx.font = `${cell_size * fontSize}px monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(text, canvas.width / 2, canvas.height / 2);
@@ -68,6 +66,15 @@ class GameOfLife {
             }
         }
         return mask;
+    }
+
+    getResponsiveFontSize() {
+        const width = window.innerWidth;
+        if (width > 1000) {
+            return 32;
+        } else {
+            return 20;
+        }
     }
 
     update() {
@@ -110,10 +117,10 @@ class GameOfLife {
 
     draw() {
         // Get current theme colors
-        let colorAliveMask = getCSSVariableColor('--link-current-color') || "darkred";
-        let colorAlive = getCSSVariableColor('--link-color') || "orangered";
+        let colorAliveMask = getCSSVariableColor('--accent-color-2') || "darkred";
+        let colorAlive = getCSSVariableColor('--accent-color-1') || "orangered";
         let colorDeadMask = getCSSVariableColor('--text-color') || "#8888af";
-        let colorDead = getCSSVariableColor('--bg-color') || "#eeeef8";
+        let colorDead = getCSSVariableColor('--bg-color-2') || "#eeeef8";
 
         // Draw cells
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -146,10 +153,27 @@ window.onload = function () {
     if (canvas.getContext) {
         const anim = new GameOfLife();
         anim.load(canvas, text);
-        // Start the animation loop
         this.intervalId = setInterval(() => {
             anim.update()
             anim.draw();
         }, 100);
+
+        addEventListener('resize', () => {
+            if (canvas.getContext) {
+                anim.load(canvas, text);
+            }
+        });
+
+        addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(this.intervalId);
+            } else {
+                this.intervalId = setInterval(() => {
+                    anim.update()
+                    anim.draw();
+                }, 100);
+            }
+        });
     }
+
 }
