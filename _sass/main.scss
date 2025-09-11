@@ -46,6 +46,16 @@ select {
     }
 }
 
+p {
+    font-size: 1rem;
+    @media screen and (max-width: 600px) {
+        font-size: 0.8rem;
+    }
+    &.small {
+        font-size: 0.6rem;
+    }
+}
+
 a {
     color: var(--link-color);
     text-decoration: none;
@@ -140,9 +150,12 @@ header {
 
 @for $i from 1 through 6 {
     h#{$i} {
-        font-size: (2.5 - ($i - 1) * 0.2) rem;
         margin-top: 1.5rem;
         margin-bottom: 0.5rem;
+        font-size: 2.0rem - ($i - 1) * 0.2rem;
+        @media screen and (max-width: 600px) {
+            font-size: 1.5rem - ($i - 1) * 0.15rem;
+        }
     }
 }
 
