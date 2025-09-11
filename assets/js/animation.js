@@ -4,8 +4,8 @@ function getCSSVariableColor(variableName) {
 }
 
 function getResponsiveDimensions(canvas) {
-    const width = document.body.clientWidth;
-    const height = 400; // Fixed height for banner
+    const width = parseInt(getComputedStyle(canvas).width, 10);
+    const height = parseInt(getComputedStyle(canvas).height, 10);
     return { width: Math.ceil(width / 5), height: Math.ceil(height / 5), cellSize: 5 };
 }
 
@@ -29,6 +29,9 @@ class GameOfLife {
                 this.grid[y][x] = Math.random() > 0.5 ? 1 : 0;
             }
         }
+
+        // Update once to remove first iteration of starving cells
+        this.update();
     }
 
     update() {
@@ -124,7 +127,7 @@ class MarchingSquares {
             this.grid[y][this.width + 1] = 1;
         }
 
-        // update once to start with some dead cells
+        // Update once to start with some dead cells
         this.update();
     }
 
@@ -195,9 +198,7 @@ class Noise {
         this.canvas.height = this.height * this.cell_size;
     }
 
-    update() {
-        this.time += 0.1;
-    }
+    update() { }
 
     draw() {
         let color1 = getCSSVariableColor('--bg-color-1') || "black";
@@ -209,7 +210,7 @@ class Noise {
         // Draw noise
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                let value = Math.random(); // Placeholder for actual Perlin noise function
+                let value = Math.random(); // Placeholder for Perlin noise function
                 let color = value > 0.5 ? color2 : color1;
                 this.ctx.fillStyle = color;
                 this.ctx.beginPath();
