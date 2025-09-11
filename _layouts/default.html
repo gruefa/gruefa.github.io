@@ -6,30 +6,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Fabius Grünhagen's personal website">
   <meta name="author" content="Fabius Grünhagen">
-  <!-- TODO: Icons/Favicons -->
   <title>{{ page.title }}</title>
   <link rel="stylesheet" href="/assets/css/styles.css">
   <script src="/assets/js/animation.js" defer></script>
   <script src="/assets/js/theme.js" defer></script>
 </head>
 
-<body>
-  <header>
-    <div class="content">
+<body class="preload">
+  <header class="flex bg-color-2 border-color-1 border-bottom">
+    <div class="content-wrapper flex space-between gap-2">
+      <a href="/" id="logo" class="icon-wrapper padding-2">
+        <svg class="icon" width="600px" height="600px" version="1.1" viewBox="0 0 60 60"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="m6.6712 5.2391v48.181h6.0731v-20.447h2.7829c0.39771 6.7716 3.083 13.811 8.8104 17.817 6.1127 4.4009 14.146 4.4845 21.313 3.4449 2.5428-0.48053 5.6978-0.92673 7.6781-2.2379v-24.363c-10.496-0.0022-20.988 9.37e-4 -31.475 0.0076 0.35583-4.9289 2.2925-9.888 5.8177-13.404 3.1814-2.6847 7.4026-4.0189 11.553-3.6405 3.8453 0.16725 7.6133 1.2223 11.135 2.738 0.76471-1.7544 1.5294-3.5087 2.2941-5.2631-5.456-2.4396-11.49-2.991-17.4-2.8344h-28.583zm6.0731 5.331h10.306c-4.6019 4.4302-7.2189 10.727-7.5537 17.073h-2.7527v-17.073zm9.1504 22.404h25.361v15.385c-5.3284 1.6415-11.331 1.6472-16.493-0.58244-4.8454-2.2164-7.8177-7.2506-8.5495-12.399-0.14106-0.79634-0.24577-1.599-0.31835-2.4044z" />
+        </svg>
+      </a>
       {% include navigation.html %}
-      <button id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Theme">🌓</button>
+      <button id="theme-toggle" class="padding-2" onclick="toggleTheme()" title="Switch to dark mode"
+        aria-label="Switch to dark mode">🌙</button>
     </div>
   </header>
-  <main>
-    <div id="banner">
-      <canvas id="animation" width="200" height="100"></canvas>
-      <span id="text">{{ page.title }}</span>
-    </div>
-    <div class="content">
-      {{ content }}
-    </div>
+  <main class="flex column bg-color-1">
+    {{ content }}
   </main>
-  {% include footer.html %}
+  <footer class="flex bg-color-2 border-color-1 border-top">
+    <div class="content-wrapper">
+      <p class="secondary">&copy; {{ site.time | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+    </div>
+  </footer>
 </body>
 
 </html>

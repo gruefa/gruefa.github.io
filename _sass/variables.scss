@@ -1,0 +1,32 @@
+:root {
+    --color-transition-time: 0.2s;
+}
+
+[data-theme="light"] {
+    --text-color: #000;
+    --secondary-text-color: #555;
+    --link-color: #1a0dab;
+    --bg-color-1: #fff;
+    --bg-color-2: #f9f9f9;
+    --bg-color-3: #f0f0f0;
+    --border-color-1: #eee;
+    --border-color-2: #ccc;
+    --border-color-3: #999;
+    --accent-color-1: #90c3f5; // #246eb9;
+    --accent-color-2: #be0231;
+    --accent-color-3: #e6af2e;
+}
+
+[data-theme="dark"] {
+    --text-color: #e0e0e0;
+    --secondary-text-color: #aaa;
+    --link-color: #8ab4f8;
+    --bg-color-1: #121212;
+    --bg-color-2: #1e1e1e;
+    --border-color-1: #333;
+    --border-color-2: #555;
+    --border-color-3: #777;
+    --accent-color-1: #0051a1;
+    --accent-color-2: #ff7d9b;
+    --accent-color-3: #ffd36c;
+}
