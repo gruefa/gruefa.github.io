@@ -6,6 +6,13 @@ function updateToggleButton(button, isDark) {
     }
 }
 
+function updateThemeColorMeta(isDark) {
+    const themeColorMeta = document.getElementById("theme-color-meta");
+    if (themeColorMeta) {
+        themeColorMeta.setAttribute("content", isDark ? "#2d2d2d" : "#f9f9f9");
+    }
+}
+
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute("data-theme");
     const newTheme = currentTheme === "dark" ? "light" : "dark";
@@ -13,6 +20,7 @@ function toggleTheme() {
     localStorage.setItem("theme", newTheme);
     const button = document.getElementById("theme-toggle");
     updateToggleButton(button, newTheme === "dark");
+    updateThemeColorMeta(newTheme === "dark");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.documentElement.setAttribute("data-theme", savedTheme);
     const button = document.getElementById("theme-toggle");
     updateToggleButton(button, savedTheme === "dark");
+    updateThemeColorMeta(savedTheme === "dark");
 });
 
 window.addEventListener("load", () => {
