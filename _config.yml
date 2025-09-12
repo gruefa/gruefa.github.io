@@ -9,4 +9,4 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  gruefa
 
 # Build settings
-theme: minima
+# theme: minima
