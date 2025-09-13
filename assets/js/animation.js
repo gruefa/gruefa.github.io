@@ -184,13 +184,14 @@ class MarchingSquares {
     }
 }
 
+// TODO: Move to utils.js
 class Color {
     lerpColor(color1, color2, t) {
-        let c1 = this.stringToRGB(color1);
-        let c2 = this.stringToRGB(color2);
-        let r = Math.round(this.lerp(c1[0], c2[0], t));
-        let g = Math.round(this.lerp(c1[1], c2[1], t));
-        let b = Math.round(this.lerp(c1[2], c2[2], t));
+        const c1 = this.stringToRGB(color1);
+        const c2 = this.stringToRGB(color2);
+        const r = Math.round(this.lerp(c1[0], c2[0], t));
+        const g = Math.round(this.lerp(c1[1], c2[1], t));
+        const b = Math.round(this.lerp(c1[2], c2[2], t));
         return `rgb(${r},${g},${b})`;
     }
     stringToRGB(color) {
@@ -207,7 +208,7 @@ class Color {
     }
 }
 
-class Noise {
+class Topography {
     load(canvas) {
         this.cell_size = 6;
         const dims = getResponsiveDimensions(canvas);
@@ -243,6 +244,36 @@ class Noise {
                 this.grid[y][x] = 0.5 * (1 + value);
             }
         }
+    }
+
+    draw() {
+        const color1 = getCSSVariableColor('--accent-color-1') || "black";
+        const color2 = getCSSVariableColor('--bg-color-1') || "white";
+
+        // Draw high value cells
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.grid[y][x] > 0.5) { this.ctx.fillStyle = this.c.lerpColor(color1, color2, (this.grid[y][x] - 0.5) / 0.5); }
+                else { continue; }
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    x * this.cell_size + this.cell_size / 2,
+                    y * this.cell_size + this.cell_size / 2,
+                    Math.ceil(this.cell_size / 2 - 1),
+                    0,
+                    2 * Math.PI
+                );
+                this.ctx.fill();
+            }
+        }
+
+        // Draw outlines
+        this.ctx.strokeStyle = color1;
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.drawOutlines(0.5);
+        this.ctx.stroke();
     }
 
     drawOutlines(threshold = 0.5) {
@@ -303,36 +334,62 @@ class Noise {
             }
         }
     }
+}
+
+class Bubbles {
+    load(canvas) {
+        this.cell_size = 10;
+        const dims = getResponsiveDimensions(canvas);
+        this.width = Math.ceil(dims.width / this.cell_size);
+        this.height = Math.ceil(dims.height / this.cell_size);
+
+        // Update canvas size
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        this.canvas.width = this.width * this.cell_size;
+        this.canvas.height = this.height * this.cell_size;
+
+        this.t = 0.00;
+        this.c = new Color();
+    }
+
+    update() {
+        this.t += 0.01;
+    }
 
     draw() {
-        let color1 = getCSSVariableColor('--text-color') || "black";
-        let color2 = getCSSVariableColor('--accent-color-1') || "lightgray";
-        let color3 = getCSSVariableColor('--bg-color-1') || "white";
+        const color1 = getCSSVariableColor('--bg-color-2') || "white";
+        const color2 = getCSSVariableColor('--accent-color-1') || "black";
+
+        // Clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw bubbles
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                if (this.grid[y][x] > 0.5) { this.ctx.fillStyle = this.c.lerpColor(color2, color3, (this.grid[y][x] - 0.5) / 0.5); }
-                else { continue; }
-                this.ctx.beginPath();
-                this.ctx.arc(
-                    x * this.cell_size + this.cell_size / 2,
-                    y * this.cell_size + this.cell_size / 2,
-                    Math.ceil(this.cell_size / 2 - 1),
-                    0,
-                    2 * Math.PI
-                );
-                this.ctx.fill();
+        const persistence = 0.5;
+        const octaves = 6;
+        let frequency = 1;
+        let amplitude = 1;
+        for (let i = 0; i < octaves; i++) {
+            this.ctx.globalAlpha = amplitude;
+            for (let y = 0; y < this.height + frequency; y += frequency) {
+                for (let x = 0; x < this.width + frequency; x += frequency) {
+                    let value = utils.noise.perlin3(0.1 * x, 0.1 * y + this.t, this.t * frequency);
+                    let color = this.c.lerpColor(color1, color2, (0.5 * (1 + value)) ** 2);
+                    this.ctx.fillStyle = color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(
+                        x * this.cell_size,
+                        y * this.cell_size,
+                        0.5 * this.cell_size * frequency,
+                        0,
+                        2 * Math.PI
+                    );
+                    this.ctx.fill();
+                }
             }
+            frequency *= 2;
+            amplitude *= persistence;
         }
-
-        // Draw outlines
-        this.ctx.strokeStyle = color2;
-        this.ctx.lineWidth = 2;
-        this.ctx.beginPath();
-        this.drawOutlines(0.5);
-        this.ctx.stroke();
     }
 }
 
@@ -340,7 +397,8 @@ function chooseRandomAnimation() {
     const animations = [
         { instance: new GameOfLife(), interval: 100 },
         { instance: new MarchingSquares(), interval: 100 },
-        { instance: new Noise(), interval: 100 }
+        { instance: new Topography(), interval: 100 },
+        { instance: new Bubbles(), interval: 100 }
     ];
     return animations[Math.floor(Math.random() * animations.length)];
 }
