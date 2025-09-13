@@ -6,15 +6,15 @@ function getCSSVariableColor(variableName) {
 function getResponsiveDimensions(canvas) {
     const width = parseInt(getComputedStyle(canvas).width, 10);
     const height = parseInt(getComputedStyle(canvas).height, 10);
-    return { width: Math.ceil(width / 5), height: Math.ceil(height / 5), cellSize: 5 };
+    return { width: width, height: height };
 }
 
 class GameOfLife {
     load(canvas) {
+        this.cell_size = 8
         const dims = getResponsiveDimensions(canvas);
-        this.width = dims.width;
-        this.height = dims.height;
-        this.cell_size = dims.cellSize;
+        this.width = Math.ceil(dims.width / this.cell_size);
+        this.height = Math.ceil(dims.height / this.cell_size);
         this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
 
         // Update canvas size
@@ -98,10 +98,10 @@ class GameOfLife {
 
 class MarchingSquares {
     load(canvas) {
+        this.cell_size = 5
         const dims = getResponsiveDimensions(canvas);
-        this.width = dims.width;
-        this.height = dims.height;
-        this.cell_size = dims.cellSize;
+        this.width = Math.ceil(dims.width / this.cell_size);
+        this.height = Math.ceil(dims.height / this.cell_size);
         this.grid = Array.from({ length: this.height + 2 }, () => Array(this.width + 2).fill(0));
 
         // Update canvas size
@@ -207,67 +207,12 @@ class Color {
     }
 }
 
-// Found at https://asserttrue.blogspot.com/2011/12/perlin-noise-in-javascript_31.html on 2025-09-12
-class PerlinNoise {
-    noise(x, y, z) {
-        let p = new Array(512)
-        let permutation = [151, 160, 137, 91, 90, 15,
-            131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
-            190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33,
-            88, 237, 149, 56, 87, 174, 20, 125, 136, 171, 168, 68, 175, 74, 165, 71, 134, 139, 48, 27, 166,
-            77, 146, 158, 231, 83, 111, 229, 122, 60, 211, 133, 230, 220, 105, 92, 41, 55, 46, 245, 40, 244,
-            102, 143, 54, 65, 25, 63, 161, 1, 216, 80, 73, 209, 76, 132, 187, 208, 89, 18, 169, 200, 196,
-            135, 130, 116, 188, 159, 86, 164, 100, 109, 198, 173, 186, 3, 64, 52, 217, 226, 250, 124, 123,
-            5, 202, 38, 147, 118, 126, 255, 82, 85, 212, 207, 206, 59, 227, 47, 16, 58, 17, 182, 189, 28, 42,
-            223, 183, 170, 213, 119, 248, 152, 2, 44, 154, 163, 70, 221, 153, 101, 155, 167, 43, 172, 9,
-            129, 22, 39, 253, 19, 98, 108, 110, 79, 113, 224, 232, 178, 185, 112, 104, 218, 246, 97, 228,
-            251, 34, 242, 193, 238, 210, 144, 12, 191, 179, 162, 241, 81, 51, 145, 235, 249, 14, 239, 107,
-            49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176, 115, 121, 50, 45, 127, 4, 150, 254,
-            138, 236, 205, 93, 222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
-        ];
-        for (let i = 0; i < 256; i++)
-            p[256 + i] = p[i] = permutation[i];
-
-        let X = Math.floor(x) & 255,                  // FIND UNIT CUBE THAT
-            Y = Math.floor(y) & 255,                  // CONTAINS POINT.
-            Z = Math.floor(z) & 255;
-        x -= Math.floor(x);                                // FIND RELATIVE X,Y,Z
-        y -= Math.floor(y);                                // OF POINT IN CUBE.
-        z -= Math.floor(z);
-        let u = this.fade(x),                                // COMPUTE FADE CURVES
-            v = this.fade(y),                                // FOR EACH OF X,Y,Z.
-            w = this.fade(z);
-        let A = p[X] + Y, AA = p[A] + Z, AB = p[A + 1] + Z,      // HASH COORDINATES OF
-            B = p[X + 1] + Y, BA = p[B] + Z, BB = p[B + 1] + Z;      // THE 8 CUBE CORNERS,
-
-        return this.scale(this.lerp(w, this.lerp(v, this.lerp(u, this.grad(p[AA], x, y, z),  // AND ADD
-            this.grad(p[BA], x - 1, y, z)), // BLENDED
-            this.lerp(u, this.grad(p[AB], x, y - 1, z),  // RESULTS
-                this.grad(p[BB], x - 1, y - 1, z))),// FROM  8
-            this.lerp(v, this.lerp(u, this.grad(p[AA + 1], x, y, z - 1),  // CORNERS
-                this.grad(p[BA + 1], x - 1, y, z - 1)), // OF CUBE
-                this.lerp(u, this.grad(p[AB + 1], x, y - 1, z - 1),
-                    this.grad(p[BB + 1], x - 1, y - 1, z - 1)))));
-    }
-    fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-    lerp(t, a, b) { return a + t * (b - a); }
-    grad(hash, x, y, z) {
-        let h = hash & 15;                      // CONVERT LO 4 BITS OF HASH CODE
-        let u = h < 8 ? x : y,                 // INTO 12 GRADIENT DIRECTIONS.
-            v = h < 4 ? y : h == 12 || h == 14 ? x : z;
-        return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
-    }
-    scale(n) { return (1 + n) / 2; }
-}
-
-
-
 class Noise {
     load(canvas) {
+        this.cell_size = 6;
         const dims = getResponsiveDimensions(canvas);
-        this.width = dims.width;
-        this.height = dims.height;
-        this.cell_size = dims.cellSize;
+        this.width = Math.ceil(dims.width / this.cell_size);
+        this.height = Math.ceil(dims.height / this.cell_size);
 
         // Update canvas size
         this.canvas = canvas;
@@ -276,41 +221,118 @@ class Noise {
         this.canvas.height = this.height * this.cell_size;
 
         this.t = 0.00;
-        this.noise = new PerlinNoise();
         this.c = new Color();
+        this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
     }
 
     update() {
-        this.t += 0.02;
+        this.t += 0.01;
+
+        // Update bubble value based on noise
+        const octaves = 4;
+        const persistence = 0.5;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const value = utils.noise.perlin3Octaves(
+                    0.05 * (x - 5 * this.t),
+                    0.05 * (y + 2 * this.t),
+                    0.01 * this.t,
+                    octaves,
+                    persistence
+                );
+                this.grid[y][x] = 0.5 * (1 + value);
+            }
+        }
     }
 
-    draw() {
-        let color1 = getCSSVariableColor('--bg-color-2') || "white";
-        let color2 = getCSSVariableColor('--accent-color-1') || "black";
+    drawOutlines(threshold = 0.5) {
+        for (let y = 0; y < this.height - 1; y++) {
+            for (let x = 0; x < this.width - 1; x++) {
+                let state = 0;
+                if (this.grid[y][x] > threshold) state |= 1;
+                if (this.grid[y][x + 1] > threshold) state |= 2;
+                if (this.grid[y + 1][x + 1] > threshold) state |= 4;
+                if (this.grid[y + 1][x] > threshold) state |= 8;
 
-        // Draw noise
-        const N = 6;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        for (let i = N; i > 0; i--) {
-            let inc = 2 ** i;
-            this.ctx.globalAlpha = i / N;
-            for (let y = 0; y < this.height / inc + 1; y++) {
-                for (let x = 0; x < this.width / inc + 1; x++) {
-                    let value = this.noise.noise(x + 3.141, y + 5.926 - this.t, this.t / inc);
-                    let color = this.c.lerpColor(color1, color2, value)
-                    this.ctx.fillStyle = color;
-                    this.ctx.beginPath();
-                    this.ctx.arc(
-                        x * inc * this.cell_size,
-                        y * inc * this.cell_size,
-                        0.5 * (inc * this.cell_size),
-                        0,
-                        2 * Math.PI
-                    );
-                    this.ctx.fill();
+                let cx = (x + 0.5) * this.cell_size;
+                let cy = (y + 1.5) * this.cell_size; // Flip y-axis
+                switch (state) {
+                    case 1:
+                    case 14:
+                        this.ctx.moveTo(cx, cy - this.cell_size / 2);
+                        this.ctx.lineTo(cx + this.cell_size / 2, cy - this.cell_size);
+                        break;
+                    case 2:
+                    case 13:
+                        this.ctx.moveTo(cx + this.cell_size / 2, cy - this.cell_size);
+                        this.ctx.lineTo(cx + this.cell_size, cy - this.cell_size / 2);
+                        break;
+                    case 3:
+                    case 12:
+                        this.ctx.moveTo(cx, cy - this.cell_size / 2);
+                        this.ctx.lineTo(cx + this.cell_size, cy - this.cell_size / 2);
+                        break;
+                    case 4:
+                    case 11:
+                        this.ctx.moveTo(cx + this.cell_size / 2, cy);
+                        this.ctx.lineTo(cx + this.cell_size, cy - this.cell_size / 2);
+                        break;
+                    case 5:
+                        this.ctx.moveTo(cx, cy - this.cell_size / 2);
+                        this.ctx.lineTo(cx + this.cell_size / 2, cy);
+                        this.ctx.moveTo(cx + this.cell_size / 2, cy - this.cell_size);
+                        this.ctx.lineTo(cx + this.cell_size, cy - this.cell_size / 2);
+                        break;
+                    case 6:
+                    case 9:
+                        this.ctx.moveTo(cx + this.cell_size / 2, cy);
+                        this.ctx.lineTo(cx + this.cell_size / 2, cy - this.cell_size);
+                        break;
+                    case 7:
+                    case 8:
+                        this.ctx.moveTo(cx, cy - this.cell_size / 2);
+                        this.ctx.lineTo(cx + this.cell_size / 2, cy);
+                        break;
+                    case 10:
+                        this.ctx.moveTo(cx + this.cell_size / 2, cy);
+                        this.ctx.lineTo(cx + this.cell_size, cy - this.cell_size / 2);
+                        this.ctx.moveTo(cx, cy - this.cell_size / 2);
+                        this.ctx.lineTo(cx + this.cell_size / 2, cy - this.cell_size);
+                        break;
                 }
             }
         }
+    }
+
+    draw() {
+        let color1 = getCSSVariableColor('--text-color') || "black";
+        let color2 = getCSSVariableColor('--accent-color-1') || "lightgray";
+        let color3 = getCSSVariableColor('--bg-color-1') || "white";
+
+        // Draw bubbles
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.grid[y][x] > 0.5) { this.ctx.fillStyle = this.c.lerpColor(color2, color3, (this.grid[y][x] - 0.5) / 0.5); }
+                else { continue; }
+                this.ctx.beginPath();
+                this.ctx.arc(
+                    x * this.cell_size + this.cell_size / 2,
+                    y * this.cell_size + this.cell_size / 2,
+                    Math.ceil(this.cell_size / 2 - 1),
+                    0,
+                    2 * Math.PI
+                );
+                this.ctx.fill();
+            }
+        }
+
+        // Draw outlines
+        this.ctx.strokeStyle = color2;
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.drawOutlines(0.5);
+        this.ctx.stroke();
     }
 }
 
