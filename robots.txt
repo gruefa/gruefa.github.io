@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://www.gruefa.me/sitemap.xml
+Sitemap: https://gruefa.me/sitemap.xml
