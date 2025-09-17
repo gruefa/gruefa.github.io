@@ -478,15 +478,14 @@ class RadialGradients {
         this.ctx.fillStyle = this.ctx.createPattern(this.grainTxtr, 'repeat');
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
-
 }
 
 function chooseRandomAnimation() {
     const animations = [
-        // { instance: new GameOfLife(), interval: 100 },
-        // { instance: new MarchingSquares(), interval: 100 },
-        // { instance: new Topography(), interval: 100 },
-        // { instance: new Bubbles(), interval: 100 },
+        { instance: new GameOfLife(), interval: 100 },
+        { instance: new MarchingSquares(), interval: 100 },
+        { instance: new Topography(), interval: 100 },
+        { instance: new Bubbles(), interval: 100 },
         { instance: new RadialGradients(), interval: 100 }
     ];
     return animations[Math.floor(Math.random() * animations.length)];
