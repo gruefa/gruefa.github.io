@@ -393,12 +393,103 @@ class Bubbles {
     }
 }
 
+class RadialGradients {
+    load(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        const dims = getResponsiveDimensions(canvas);
+        this.canvas.width = dims.width;
+        this.canvas.height = dims.height;
+
+        // Initialize gradients
+        const color1 = getCSSVariableColor('--accent-color-1') || "lightgrey";
+        const color2 = getCSSVariableColor('--accent-color-2') || "grey";
+        const bgColor = getCSSVariableColor('--bg-color-1') || "white";
+        this.gradients = [
+            { x: 0, y: 0, c1: color1, c2: bgColor, r: 0.5 },
+            { x: this.canvas.width, y: this.canvas.height, c1: color2, c2: bgColor, r: 0.75 },
+        ];
+        this.t = 0.0;
+
+        // Create grain texture
+        this.grainTxtr = document.createElement('canvas');
+        const minDim = Math.min(this.canvas.width, this.canvas.height);
+        this.grainTxtr.width = minDim / 2;
+        this.grainTxtr.height = minDim / 2;
+        let grainCtx = this.grainTxtr.getContext('2d');
+        let imageData = grainCtx.createImageData(this.grainTxtr.width, this.grainTxtr.height);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            let shade = Math.floor(Math.random() * 256);
+            imageData.data[i] = shade;
+            imageData.data[i + 1] = shade;
+            imageData.data[i + 2] = shade;
+            imageData.data[i + 3] = 15; // Low alpha for subtlety
+        }
+        grainCtx.putImageData(imageData, 0, 0);
+    }
+
+    #rotatePoint(p, o, angle) {
+        let s = Math.sin(angle);
+        let c = Math.cos(angle);
+
+        // Translate point back to origin
+        let px = p.x - o.x;
+        let py = p.y - o.y;
+
+        // Rotate point
+        let xnew = px * c - py * s;
+        let ynew = px * s + py * c;
+
+        // Translate point back
+        return { x: xnew + o.x, y: ynew + o.y };
+    }
+
+    update() {
+        this.t += 0.01;
+
+        // Update gradient positions
+        const origin = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
+        for (let g of this.gradients) {
+            const rotated = this.#rotatePoint(g, origin, Math.cos(this.t) * 0.01);
+            g.x = rotated.x;
+            g.y = rotated.y;
+        }
+    }
+
+    draw() {
+        // Clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Create radial gradient
+        this.ctx.globalAlpha = 0.5;
+        this.ctx.globalCompositeOperation = 'multiply';
+        for (let g of this.gradients) {
+            let gradient = this.ctx.createRadialGradient(
+                g.x, g.y, 0,
+                g.x, g.y, Math.sqrt(this.canvas.width ** 2 + this.canvas.height ** 2) * g.r
+            );
+            gradient.addColorStop(0, g.c1);
+            gradient.addColorStop(1, g.c2);
+            this.ctx.fillStyle = gradient;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+        this.ctx.globalCompositeOperation = 'source-over';
+
+        // Draw grain texture
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.fillStyle = this.ctx.createPattern(this.grainTxtr, 'repeat');
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+}
+
 function chooseRandomAnimation() {
     const animations = [
         { instance: new GameOfLife(), interval: 100 },
         { instance: new MarchingSquares(), interval: 100 },
         { instance: new Topography(), interval: 100 },
-        { instance: new Bubbles(), interval: 100 }
+        { instance: new Bubbles(), interval: 100 },
+        { instance: new RadialGradients(), interval: 100 }
     ];
     return animations[Math.floor(Math.random() * animations.length)];
 }
