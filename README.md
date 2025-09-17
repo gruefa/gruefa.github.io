@@ -14,5 +14,9 @@
     - [ ] Phase Spaces of 
         - [ ] Simple Pendulum
         - [ ] Double Pendulum
+    - [ ] Moving gradients
+    - [ ] Particle simulation
 - [ ] SEO
-- [ ] Domain
+    - [ ] Google
+    - [ ] Bing
+- [x] Domain
