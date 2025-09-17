@@ -402,12 +402,9 @@ class RadialGradients {
         this.canvas.height = dims.height;
 
         // Initialize gradients
-        const color1 = getCSSVariableColor('--accent-color-1') || "lightgrey";
-        const color2 = getCSSVariableColor('--accent-color-2') || "grey";
-        const bgColor = getCSSVariableColor('--bg-color-1') || "white";
         this.gradients = [
-            { x: 0, y: 0, c1: color1, c2: bgColor, r: 0.5 },
-            { x: this.canvas.width, y: this.canvas.height, c1: color2, c2: bgColor, r: 0.75 },
+            { x: 0, y: 0, color: '--accent-color-1', fallbackColor: "lightgrey", r: 0.5 },
+            { x: this.canvas.width, y: this.canvas.height, color: '--accent-color-2', fallbackColor: "grey", r: 0.5 },
         ];
         this.t = 0.0;
 
@@ -461,6 +458,7 @@ class RadialGradients {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Create radial gradient
+        const bgColor = getCSSVariableColor('--bg-color-1') || "white";
         this.ctx.globalAlpha = 0.5;
         this.ctx.globalCompositeOperation = 'multiply';
         for (let g of this.gradients) {
@@ -468,8 +466,8 @@ class RadialGradients {
                 g.x, g.y, 0,
                 g.x, g.y, Math.sqrt(this.canvas.width ** 2 + this.canvas.height ** 2) * g.r
             );
-            gradient.addColorStop(0, g.c1);
-            gradient.addColorStop(1, g.c2);
+            gradient.addColorStop(0, getCSSVariableColor(g.color) || g.fallbackColor);
+            gradient.addColorStop(1, bgColor || "white");
             this.ctx.fillStyle = gradient;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
@@ -485,10 +483,10 @@ class RadialGradients {
 
 function chooseRandomAnimation() {
     const animations = [
-        { instance: new GameOfLife(), interval: 100 },
-        { instance: new MarchingSquares(), interval: 100 },
-        { instance: new Topography(), interval: 100 },
-        { instance: new Bubbles(), interval: 100 },
+        // { instance: new GameOfLife(), interval: 100 },
+        // { instance: new MarchingSquares(), interval: 100 },
+        // { instance: new Topography(), interval: 100 },
+        // { instance: new Bubbles(), interval: 100 },
         { instance: new RadialGradients(), interval: 100 }
     ];
     return animations[Math.floor(Math.random() * animations.length)];
