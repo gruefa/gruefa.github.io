@@ -48,6 +48,26 @@ jobs:
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
+      - name: Install NodeJS and CLI tools
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install minification tools
+        run: |
+          npm install -g terser
+          npm install -g csso-cli
+          npm install -g html-minifier
+      - name: Minify JS/CSS/HTML
+        run: |
+          for file in ./_site/assets/js/*.js; do
+            terser "$file" --compress -o "$file"
+          done
+          for file in ./_site/assets/css/*.css; do
+            csso "$file" -o "$file"
+          done
+          for file in ./_site/*.html; do
+            html-minifier --collapse-boolean-attributes --collapse-whitespace --minify-css --minify-js --minify-urls --remove-attribute-quotes --remove-comments --remove-empty-attributes --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-style-link-type-attributes --remove-tag-whitespace --use-short-doctype -o "$file" "$file"
+          done
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-pages-artifact@v3
