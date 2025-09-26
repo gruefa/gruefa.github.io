@@ -5,7 +5,10 @@ description: "Fabius Grünhagen - Software Developer and CS Master Student @ ETH
 ---
 <canvas id="banner" class="bg-color-2" width="200" height="100"></canvas>
 <div id="wrapper" class="content-wrapper flex column gap-2">
-    <img id="profile-picture" class="border border-color-1" src="/assets/images/profile-lowres.jpg"
+    <img id="profile-picture" src="/assets/images/profile-200.webp" srcset="/assets/images/profile-150.webp 150w,
+          /assets/images/profile-200.webp 200w,
+          /assets/images/profile-300.webp 300w,
+          /assets/images/profile-400.webp 400w" sizes="(max-width: 600px) 150px, (max-height: 900px) 150px, 200px"
         alt="Profile Picture">
     <div id="title-wrapper" class="flex column">
         <h1 class="margin-1 align-center">I'm Fabius Grünhagen</h1>
@@ -39,8 +42,8 @@ description: "Fabius Grünhagen - Software Developer and CS Master Student @ ETH
                 </svg>
 
             </a>
-            <a class="icon-wrapper" href="assets/CV.pdf" download="CV_Fabius_Grünhagen.pdf" aria-label="Download CV as PDF"
-                title="Download CV">
+            <a class="icon-wrapper" href="assets/CV.pdf" download="CV_Fabius_Grünhagen.pdf"
+                aria-label="Download CV as PDF" title="Download CV">
                 <svg class="icon rotate-15" width="30px" height="30px" fill="none" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
