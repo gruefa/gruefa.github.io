@@ -1,6 +1,11 @@
 // Get color from CSS variable
-function getCSSVariableColor(variableName) {
-    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+function getCSSVariableColor(variableName, fallback = '#000') {
+    const str = getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+    if (str) {
+        return utils.color.parse(str);
+    } else {
+        return utils.color.parse(fallback);
+    }
 }
 
 function getResponsiveDimensions(canvas) {
@@ -23,6 +28,9 @@ class GameOfLife {
         this.canvas.width = this.width * this.cell_size;
         this.canvas.height = this.height * this.cell_size;
 
+        // Keep track of time
+        this.time = 0;
+
         // Randomly initialize the grid
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
@@ -34,7 +42,8 @@ class GameOfLife {
         this.update();
     }
 
-    update() {
+    update(dt) {
+
         // Set random cells to alive
         for (let i = 0; i < 5; i++) {
             let x = Math.floor(Math.random() * this.width);
@@ -74,14 +83,14 @@ class GameOfLife {
 
     draw() {
         // Get current theme colors
-        let colorAlive = getCSSVariableColor('--accent-color-1') || "black";
-        let colorDead = getCSSVariableColor('--bg-color-1') || "white";
+        let colorAlive = getCSSVariableColor('--accent-color-1')
+        let colorDead = getCSSVariableColor('--bg-color-1', '#fff');
 
         // Draw cells
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                this.ctx.fillStyle = this.grid[y][x] === 1 ? colorAlive : colorDead;
+                this.ctx.fillStyle = this.grid[y][x] === 1 ? colorAlive.toHex() : colorDead.toHex();
                 this.ctx.beginPath();
                 this.ctx.arc(
                     x * this.cell_size + this.cell_size / 2,
@@ -131,7 +140,7 @@ class MarchingSquares {
         this.update();
     }
 
-    update() {
+    update(dt) {
         // Apply Marching Squares Rules
         let newGrid = this.grid.map(arr => arr.slice());
         for (let y = 1; y < this.height + 1; y++) {
@@ -162,14 +171,14 @@ class MarchingSquares {
 
     draw() {
         // Get current theme colors
-        let colorDead = getCSSVariableColor('--accent-color-1') || "black";
+        let colorDead = getCSSVariableColor('--accent-color-1');
 
         // Draw cells
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let y = 1; y < this.height + 1; y++) {
             for (let x = 1; x < this.width + 1; x++) {
                 if (this.grid[y][x] === 0) {
-                    this.ctx.fillStyle = colorDead;
+                    this.ctx.fillStyle = colorDead.toHex();
                     this.ctx.beginPath();
                     this.ctx.rect(
                         (x + Math.random() / 4) * this.cell_size,
@@ -181,30 +190,6 @@ class MarchingSquares {
                 }
             }
         }
-    }
-}
-
-// TODO: Move to utils.js
-class Color {
-    lerpColor(color1, color2, t) {
-        const c1 = this.stringToRGB(color1);
-        const c2 = this.stringToRGB(color2);
-        const r = Math.round(this.lerp(c1[0], c2[0], t));
-        const g = Math.round(this.lerp(c1[1], c2[1], t));
-        const b = Math.round(this.lerp(c1[2], c2[2], t));
-        return `rgb(${r},${g},${b})`;
-    }
-    stringToRGB(color) {
-        if (color.startsWith('#')) {
-            let bigint = parseInt(color.slice(1), 16);
-            return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
-        } else if (color.startsWith('rgb')) {
-            return color.match(/\d+/g).map(Number);
-        }
-        return [0, 0, 0]; // Default to black if unknown format
-    }
-    lerp(a, b, t) {
-        return a + (b - a) * t;
     }
 }
 
@@ -222,12 +207,11 @@ class Topography {
         this.canvas.height = this.height * this.cell_size;
 
         this.t = 0.00;
-        this.c = new Color();
         this.grid = Array.from({ length: this.height }, () => Array(this.width).fill(0));
     }
 
-    update() {
-        this.t += 0.01;
+    update(dt) {
+        this.t += 0.001 * dt;
 
         // Update bubble value based on noise
         const octaves = 4;
@@ -247,14 +231,17 @@ class Topography {
     }
 
     draw() {
-        const color1 = getCSSVariableColor('--accent-color-1') || "black";
-        const color2 = getCSSVariableColor('--bg-color-1') || "white";
+        const color1 = getCSSVariableColor('--accent-color-1');
+        const color2 = getCSSVariableColor('--bg-color-1', '#fff');
 
         // Draw high value cells
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                if (this.grid[y][x] > 0.5) { this.ctx.fillStyle = this.c.lerpColor(color1, color2, (this.grid[y][x] - 0.5) / 0.5); }
+                if (this.grid[y][x] > 0.5) {
+                    const color = utils.color.lerp((this.grid[y][x] - 0.5) / 0.5, color1, color2);
+                    this.ctx.fillStyle = color.toHex();
+                }
                 else { continue; }
                 this.ctx.beginPath();
                 this.ctx.arc(
@@ -269,7 +256,7 @@ class Topography {
         }
 
         // Draw outlines
-        this.ctx.strokeStyle = color1;
+        this.ctx.strokeStyle = color1.toHex();
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.drawOutlines(0.5);
@@ -353,13 +340,13 @@ class Bubbles {
         this.c = new Color();
     }
 
-    update() {
-        this.t += 0.01;
+    update(dt) {
+        this.t += dt;
     }
 
     draw() {
-        const color1 = getCSSVariableColor('--bg-color-2') || "white";
-        const color2 = getCSSVariableColor('--accent-color-1') || "black";
+        const color1 = getCSSVariableColor('--bg-color-2');
+        const color2 = getCSSVariableColor('--accent-color-1', '#fff');
 
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -374,8 +361,8 @@ class Bubbles {
             for (let y = 0; y < this.height + frequency; y += frequency) {
                 for (let x = 0; x < this.width + frequency; x += frequency) {
                     let value = utils.noise.perlin3(0.1 * x, 0.1 * y + this.t, this.t * frequency);
-                    let color = this.c.lerpColor(color1, color2, (0.5 * (1 + value)) ** 2);
-                    this.ctx.fillStyle = color;
+                    const color = utils.color.lerp((0.5 * (1 + value)) ** 2, color1, color2);
+                    this.ctx.fillStyle = color.toRGB();
                     this.ctx.beginPath();
                     this.ctx.arc(
                         x * this.cell_size,
@@ -441,8 +428,8 @@ class RadialGradients {
         return { x: xnew + o.x, y: ynew + o.y };
     }
 
-    update() {
-        this.t += 0.01;
+    update(dt) {
+        this.t += dt;
 
         // Update gradient positions
         const origin = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
@@ -458,7 +445,7 @@ class RadialGradients {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Create radial gradient
-        const bgColor = getCSSVariableColor('--bg-color-1') || "white";
+        const bgColor = getCSSVariableColor('--bg-color-1', '#fff');
         this.ctx.globalAlpha = 0.5;
         this.ctx.globalCompositeOperation = 'multiply';
         for (let g of this.gradients) {
@@ -466,8 +453,9 @@ class RadialGradients {
                 g.x, g.y, 0,
                 g.x, g.y, Math.sqrt(this.canvas.width ** 2 + this.canvas.height ** 2) * g.r
             );
-            gradient.addColorStop(0, getCSSVariableColor(g.color) || g.fallbackColor);
-            gradient.addColorStop(1, bgColor || "white");
+            const fgColor = getCSSVariableColor(g.color, g.fallbackColor);
+            gradient.addColorStop(0, fgColor.toRGB());
+            gradient.addColorStop(1, bgColor.toRGB());
             this.ctx.fillStyle = gradient;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
@@ -480,36 +468,74 @@ class RadialGradients {
     }
 }
 
+// Random animation selection
+let animation;
+let max_fps = 60;
 function chooseRandomAnimation() {
-    const animations = [
-        { instance: new GameOfLife(), interval: 100 },
-        { instance: new MarchingSquares(), interval: 100 },
-        { instance: new Topography(), interval: 100 },
-        { instance: new Bubbles(), interval: 100 },
-        { instance: new RadialGradients(), interval: 100 }
-    ];
-    return animations[Math.floor(Math.random() * animations.length)];
+    const choice = Math.floor(Math.random() * 5);
+    console.debug(`choice=${choice}`)
+    switch (choice) {
+        case 0:
+            animation = new GameOfLife();
+            max_fps = 8;
+            break;
+        case 1:
+            animation = new MarchingSquares();
+            max_fps = 10;
+            break;
+        case 2:
+            animation = new Topography();
+            max_fps = 30;
+            break;
+        case 3:
+            animation = new Bubbles();
+            max_fps = 60;
+            break;
+        case 4:
+            animation = new RadialGradients();
+            max_fps = 60;
+            break;
+        default:
+            console.error("Animation index out of bounds. Return animation Game of Life as fallback")
+            animation = new GameOfLife();
+            max_fps = 8;
+    }
 }
 
+// Main animation loop
+let lastDraw = 0;
+function loop(time) {
+
+    // Cap max. framerate
+    requestAnimationFrame(loop);
+    const dt = time - lastDraw;
+    if (dt <= (1000 / max_fps)) {
+        return;
+    }
+    console.debug(`dt = ${dt}`)
+    lastDraw = time;
+
+    animation.update(dt)
+    animation.draw();
+}
+
+// Initialize animation on page load
 function onload() {
     const canvas = document.getElementById("banner");
-    if (!canvas.getContext) return;
+    if (!canvas.getContext) {
+        return;
+    }
 
-    const { instance: anim, interval } = chooseRandomAnimation();
-    anim.load(canvas);
-    anim.draw();
+    chooseRandomAnimation();
+    animation.load(canvas);
+    requestAnimationFrame(loop);
 
-    const timer = setInterval(() => {
-        anim.update();
-        anim.draw();
-    }, interval);
-
+    // Only reload the canvas after window resizing is complete
     let resizeTimeout;
     addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            anim.load(canvas);
-            anim.draw();
+            animation.load(canvas);
         }, 100);
     });
 }

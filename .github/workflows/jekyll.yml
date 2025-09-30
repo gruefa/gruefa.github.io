@@ -60,7 +60,7 @@ jobs:
       - name: Minify JS/CSS/HTML
         run: |
           for file in ./_site/assets/js/*.js; do
-            terser "$file" --compress -o "$file"
+            terser "$file" --compress --mangle -o "$file"
           done
           for file in ./_site/assets/css/*.css; do
             csso "$file" -o "$file"
