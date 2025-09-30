@@ -14,9 +14,10 @@
     border-radius: 50%;
     box-sizing: border-box;
     overflow: hidden;
-    text-align: center;
     line-height: 200px;
+    text-align: center;
     z-index: 5;
+    background-color: var(--bg-color-2);
 }
 #wrapper {
     margin-top: -100px;
