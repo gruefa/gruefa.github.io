@@ -211,7 +211,7 @@ class Topography {
     }
 
     update(dt) {
-        this.t += 0.001 * dt;
+        this.t += 0.01 * dt;
 
         // Update bubble value based on noise
         const octaves = 4;
@@ -219,9 +219,9 @@ class Topography {
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
                 const value = utils.noise.perlin3Octaves(
-                    0.05 * (x - 5 * this.t),
-                    0.05 * (y + 2 * this.t),
-                    0.01 * this.t,
+                    0.05 * (x - 5 * 0.01 * this.t),
+                    0.05 * (y + 2 * 0.01 * this.t),
+                    0.001 * this.t,
                     octaves,
                     persistence
                 );
@@ -340,7 +340,7 @@ class Bubbles {
     }
 
     update(dt) {
-        this.t += dt;
+        this.t += 0.001 * dt;
     }
 
     draw() {
@@ -359,7 +359,7 @@ class Bubbles {
             this.ctx.globalAlpha = amplitude;
             for (let y = 0; y < this.height + frequency; y += frequency) {
                 for (let x = 0; x < this.width + frequency; x += frequency) {
-                    let value = utils.noise.perlin3(0.1 * x, 0.1 * y + this.t, this.t * frequency);
+                    let value = utils.noise.perlin3(0.1 * x, 0.1 * y + 0.01 * this.t, 0.01 * this.t * frequency);
                     const color = utils.color.lerp((0.5 * (1 + value)) ** 2, color1, color2);
                     this.ctx.fillStyle = color.toRGB();
                     this.ctx.beginPath();
@@ -488,7 +488,7 @@ function chooseRandomAnimation() {
             break;
         case 3:
             animation = new Bubbles();
-            max_fps = 60;
+            max_fps = 20;
             break;
         case 4:
             animation = new RadialGradients();
