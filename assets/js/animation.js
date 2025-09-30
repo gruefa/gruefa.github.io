@@ -337,7 +337,6 @@ class Bubbles {
         this.canvas.height = this.height * this.cell_size;
 
         this.t = 0.00;
-        this.c = new Color();
     }
 
     update(dt) {
