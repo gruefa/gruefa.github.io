@@ -20,3 +20,6 @@
     - [ ] Google
     - [ ] Bing
 - [x] Domain
+
+## License
+[MIT](./LICENSE)
