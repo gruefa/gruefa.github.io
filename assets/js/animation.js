@@ -472,7 +472,6 @@ let animation;
 let max_fps = 60;
 function chooseRandomAnimation() {
     const choice = Math.floor(Math.random() * 5);
-    console.debug(`choice=${choice}`)
     switch (choice) {
         case 0:
             animation = new GameOfLife();
@@ -511,7 +510,6 @@ function loop(time) {
     if (dt <= (1000 / max_fps)) {
         return;
     }
-    console.debug(`dt = ${dt}`)
     lastDraw = time;
 
     animation.update(dt)
