@@ -51,7 +51,7 @@ jobs:
       - name: Install NodeJS and CLI tools
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '22'
       - name: Install minification tools
         run: |
           npm install -g terser
@@ -66,7 +66,7 @@ jobs:
             csso "$file" -o "$file"
           done
           for file in ./_site/*.html; do
-            html-minifier --collapse-boolean-attributes --collapse-whitespace --minify-css --minify-js --minify-urls --remove-attribute-quotes --remove-comments --remove-empty-attributes --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-style-link-type-attributes --remove-tag-whitespace --use-short-doctype -o "$file" "$file"
+            html-minifier --collapse-boolean-attributes --collapse-whitespace --minify-css --minify-js --minify-urls --remove-attribute-quotes --remove-comments --remove-empty-attributes --remove-optional-tags --remove-redundant-attributes --remove-tag-whitespace --use-short-doctype -o "$file" "$file"
           done
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
