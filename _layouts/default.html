@@ -2,7 +2,9 @@
 <html lang="en">
 
 <head>
+  <title>{{ page.title | default: site.title }}</title>
   {% seo %}
+  <meta name="description" content="{{ page.description | default: site.description }}">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" id="theme-color-meta" content="#f9f9f9">
